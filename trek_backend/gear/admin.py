@@ -1,3 +1,8 @@
 from django.contrib import admin
+from .models import Gear, GearImage, GearCategory, GearRentalAvailability, GearReview
 
-# Register your models here.
+admin.site.register(Gear)
+admin.site.register(GearImage)
+admin.site.register(GearCategory)
+admin.site.register(GearRentalAvailability)
+admin.site.register(GearReview)

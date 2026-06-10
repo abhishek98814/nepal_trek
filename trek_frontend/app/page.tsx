@@ -1,224 +1,280 @@
-import Link from 'next/link';
+import Link from "next/link";
+import TrekCard from "@/components/trek/TrekCard";
+import TourCard from "@/components/tour/TourCard";
 
-export default function Home() {
+async function getTreks() {
+  try {
+    const res = await fetch("http://127.0.0.1:8000/api/treks/", { cache: "no-store" });
+    if (!res.ok) return [];
+    const data = await res.json();
+    return data?.results || data || [];
+  } catch {
+    return [];
+  }
+}
+
+async function getTours() {
+  try {
+    const res = await fetch("http://127.0.0.1:8000/api/tours/", { cache: "no-store" });
+    if (!res.ok) return [];
+    const data = await res.json();
+    return data?.results || data || [];
+  } catch {
+    return [];
+  }
+}
+
+export default async function HomePage() {
+  const treks = await getTreks();
+  const tours = await getTours();
+  const featuredTreks = treks.filter((t: any) => t.is_featured).slice(0, 3);
+  const featuredTours = tours.filter((t: any) => t.is_featured).slice(0, 3);
+
   return (
-    <main className="min-h-screen">
+    <main style={{ background: '#f8f9fb', minHeight: '100vh' }}>
 
-      {/* Navbar */}
-      <nav className="flex items-center justify-between px-8 py-4 bg-white shadow-sm">
-        <div className="text-2xl font-bold text-green-700">🏔️ Trek Nepal</div>
-        <div className="flex gap-6 text-sm font-medium">
-          <Link href="/trek" className="hover:text-green-700">Treks</Link>
-          <Link href="/tours" className="hover:text-green-700">Tours</Link>
-          <Link href="/gear" className="hover:text-green-700">Gear</Link>
-          <Link href="/about" className="hover:text-green-700">About</Link>
-        </div>
-        <div className="flex gap-3">
-          <Link href="/auth/login"
-            className="px-4 py-2 text-sm border border-green-700 text-green-700 rounded-lg hover:bg-green-50">
-            Login
-          </Link>
-          <Link href="/auth/register"
-            className="px-4 py-2 text-sm bg-green-700 text-white rounded-lg hover:bg-green-800">
-            Register
-          </Link>
-        </div>
-      </nav>
+      {/* ── HERO ── */}
+      <section style={{
+        background: 'linear-gradient(135deg, #0f3d57 0%, #0a2e45 55%, #061e30 100%)',
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        position: 'relative',
+        overflow: 'hidden',
+        padding: '0 24px',
+      }}>
+        {/* Ambient blobs */}
+        <div style={{
+          position: 'absolute', inset: 0, pointerEvents: 'none',
+          backgroundImage: `
+            radial-gradient(ellipse at 15% 60%, rgba(20,184,166,0.15) 0%, transparent 50%),
+            radial-gradient(ellipse at 85% 20%, rgba(20,184,166,0.08) 0%, transparent 45%),
+            radial-gradient(ellipse at 50% 100%, rgba(15,61,87,0.4) 0%, transparent 60%)
+          `,
+        }} />
 
-      {/* Hero Section */}
-      <section className="bg-gradient-to-br from-green-800 to-green-600 text-white py-24 px-8 text-center">
-        <h1 className="text-5xl font-bold mb-4">Explore Nepal Like Never Before</h1>
-        <p className="text-xl mb-8 text-green-100">
-          Book treks, hire guides, join tours and buy gear — all in one place
-        </p>
-        <div className="flex justify-center gap-4">
-          <Link href="/trek"
-            className="px-6 py-3 bg-white text-green-800 font-semibold rounded-lg hover:bg-green-50">
-            Browse Treks
-          </Link>
-          <Link href="/tours"
-            className="px-6 py-3 border border-white text-white font-semibold rounded-lg hover:bg-green-700">
-            Explore Tours
-          </Link>
-        </div>
-      </section>
-
-      {/* Stats */}
-      <section className="grid grid-cols-4 gap-0 bg-green-900 text-white text-center">
-        {[
-          { number: '100+', label: 'Trek Routes' },
-          { number: '50+', label: 'Expert Guides' },
-          { number: '200+', label: 'Gear Items' },
-          { number: '1000+', label: 'Happy Travellers' },
-        ].map((stat) => (
-          <div key={stat.label} className="py-8 border-r border-green-700 last:border-0">
-            <div className="text-3xl font-bold">{stat.number}</div>
-            <div className="text-green-300 text-sm mt-1">{stat.label}</div>
+        <div style={{ position: 'relative', textAlign: 'center', maxWidth: '760px' }}>
+          <div style={{
+            display: 'inline-flex', alignItems: 'center', gap: '8px',
+            padding: '6px 16px', borderRadius: '20px',
+            border: '1px solid rgba(20,184,166,0.35)',
+            color: '#14b8a6', fontSize: '12px', fontWeight: 600,
+            letterSpacing: '2px', textTransform: 'uppercase',
+            marginBottom: '28px',
+          }}>
+            🏔️ &nbsp;Nepal's premier trekking platform
           </div>
-        ))}
+
+          <h1 style={{
+            fontSize: 'clamp(40px, 8vw, 76px)',
+            fontWeight: 800,
+            color: '#fff',
+            lineHeight: 1.05,
+            margin: '0 0 24px',
+            letterSpacing: '-2px',
+          }}>
+            The Himalayas<br />
+            <span style={{
+              background: 'linear-gradient(90deg, #14b8a6, #67e8f9)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+            }}>are calling.</span>
+          </h1>
+
+          <p style={{
+            fontSize: '18px',
+            color: 'rgba(255,255,255,0.6)',
+            lineHeight: 1.75,
+            margin: '0 auto 40px',
+            maxWidth: '520px',
+          }}>
+            Curated treks, guided tours, and gear rentals — crafted by locals who know every pass, every teahouse, every summit view.
+          </p>
+
+          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
+            <Link href="/trek" style={{ textDecoration: 'none' }}>
+              <button style={{
+                padding: '14px 32px', borderRadius: '10px', border: 'none',
+                background: 'linear-gradient(135deg, #14b8a6, #0d9488)',
+                color: '#fff', fontSize: '15px', fontWeight: 700,
+                cursor: 'pointer', letterSpacing: '0.2px',
+              }}>Browse Treks</button>
+            </Link>
+            <Link href="/tours" style={{ textDecoration: 'none' }}>
+              <button style={{
+                padding: '14px 32px', borderRadius: '10px',
+                border: '1.5px solid rgba(255,255,255,0.3)',
+                background: 'rgba(255,255,255,0.06)',
+                color: '#fff', fontSize: '15px', fontWeight: 600,
+                cursor: 'pointer',
+              }}>Explore Tours</button>
+            </Link>
+          </div>
+        </div>
+
+        {/* Scroll hint */}
+        <div style={{
+          position: 'absolute', bottom: '32px', left: '50%', transform: 'translateX(-50%)',
+          display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px',
+          color: 'rgba(255,255,255,0.35)', fontSize: '11px', letterSpacing: '1.5px',
+          textTransform: 'uppercase',
+        }}>
+          <span>Scroll</span>
+          <div style={{
+            width: '1px', height: '40px',
+            background: 'linear-gradient(to bottom, rgba(255,255,255,0.3), transparent)',
+          }} />
+        </div>
       </section>
 
-      {/* Featured Categories */}
-      <section className="py-16 px-8 bg-gray-50">
-        <h2 className="text-3xl font-bold text-center mb-12 text-gray-800">
-          What are you looking for?
-        </h2>
-        <div className="grid grid-cols-3 gap-6 max-w-5xl mx-auto">
+      {/* ── STATS ── */}
+      <section style={{ background: '#fff', borderBottom: '1px solid #e8ecf0' }}>
+        <div style={{
+          maxWidth: '1000px', margin: '0 auto', padding: '0 24px',
+          display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)',
+        }}>
           {[
-            {
-              icon: '🥾',
-              title: 'Trekking',
-              desc: 'Everest Base Camp, Annapurna Circuit, Langtang and more',
-              href: '/trek',
-              color: 'bg-green-50 border-green-200',
-            },
-            {
-              icon: '🗺️',
-              title: 'Tours',
-              desc: 'Kathmandu valley, Pokhara, Chitwan jungle safari',
-              href: '/tours',
-              color: 'bg-blue-50 border-blue-200',
-            },
-            {
-              icon: '🎒',
-              title: 'Gear',
-              desc: 'Buy, sell or rent trekking equipment at best prices',
-              href: '/gear',
-              color: 'bg-orange-50 border-orange-200',
-            },
-          ].map((cat) => (
-            <Link href={cat.href} key={cat.title}>
-              <div className={`border rounded-xl p-6 ${cat.color} hover:shadow-md transition cursor-pointer`}>
-                <div className="text-4xl mb-3">{cat.icon}</div>
-                <h3 className="text-xl font-semibold mb-2">{cat.title}</h3>
-                <p className="text-gray-600 text-sm">{cat.desc}</p>
-              </div>
-            </Link>
+            { n: '6,000+', label: 'Trekkers guided' },
+            { n: '40+',    label: 'Routes available' },
+            { n: '98%',    label: 'Satisfaction rate' },
+            { n: '7 yrs',  label: 'Operating in Nepal' },
+          ].map((s, i) => (
+            <div key={i} style={{
+              padding: '28px 20px', textAlign: 'center',
+              borderRight: i < 3 ? '1px solid #e8ecf0' : 'none',
+            }}>
+              <div style={{ fontSize: '28px', fontWeight: 800, color: '#0a2e45', letterSpacing: '-1px', marginBottom: '4px' }}>{s.n}</div>
+              <div style={{ fontSize: '12px', color: '#64748b', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.5px' }}>{s.label}</div>
+            </div>
           ))}
         </div>
       </section>
 
-      {/* Popular Treks */}
-      <section className="py-16 px-8">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex justify-between items-center mb-8">
-            <h2 className="text-3xl font-bold text-gray-800">Popular Treks</h2>
-            <Link href="/trek" className="text-green-700 hover:underline text-sm">
-              View all →
-            </Link>
+      {/* ── FEATURED TREKS ── */}
+      <section style={{ maxWidth: '1200px', margin: '0 auto', padding: '80px 24px' }}>
+        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: '40px', flexWrap: 'wrap', gap: '12px' }}>
+          <div>
+            <div style={{ fontSize: '12px', fontWeight: 600, letterSpacing: '2px', textTransform: 'uppercase', color: '#14b8a6', marginBottom: '8px' }}>
+              Trekking
+            </div>
+            <h2 style={{ fontSize: '32px', fontWeight: 800, color: '#0a2e45', margin: 0, letterSpacing: '-0.5px' }}>
+              Popular Treks
+            </h2>
           </div>
-          <div className="grid grid-cols-3 gap-6">
-            {[
-              {
-                name: 'Everest Base Camp',
-                days: 14,
-                difficulty: 'Strenuous',
-                price: '$1200',
-                region: 'Khumbu',
-                rating: '4.9',
-              },
-              {
-                name: 'Annapurna Circuit',
-                days: 12,
-                difficulty: 'Moderate',
-                price: '$900',
-                region: 'Annapurna',
-                rating: '4.8',
-              },
-              {
-                name: 'Langtang Valley',
-                days: 7,
-                difficulty: 'Moderate',
-                price: '$600',
-                region: 'Langtang',
-                rating: '4.7',
-              },
-            ].map((trek) => (
-              <div key={trek.name}
-                className="border rounded-xl overflow-hidden hover:shadow-lg transition">
-                <div className="h-40 bg-gradient-to-br from-green-400 to-green-700 flex items-center justify-center text-5xl">
-                  🏔️
-                </div>
-                <div className="p-4">
-                  <div className="flex justify-between items-start mb-2">
-                    <h3 className="font-semibold text-gray-800">{trek.name}</h3>
-                    <span className="text-yellow-500 text-sm">⭐ {trek.rating}</span>
-                  </div>
-                  <p className="text-sm text-gray-500 mb-3">
-                    {trek.region} · {trek.days} days · {trek.difficulty}
-                  </p>
-                  <div className="flex justify-between items-center">
-                    <span className="text-green-700 font-bold">{trek.price}</span>
-                    <Link href="/trek"
-                      className="text-xs px-3 py-1 bg-green-700 text-white rounded-lg hover:bg-green-800">
-                      View Details
-                    </Link>
-                  </div>
-                </div>
-              </div>
+          <Link href="/trek" style={{ textDecoration: 'none' }}>
+            <span style={{ fontSize: '14px', fontWeight: 600, color: '#14b8a6' }}>View all treks →</span>
+          </Link>
+        </div>
+
+        {featuredTreks.length === 0 ? (
+          <EmptyState label="treks" />
+        ) : (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '24px' }}>
+            {featuredTreks.map((trek: any) => (
+              <TrekCard key={trek.id} trek={trek} />
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* ── DIVIDER BANNER ── */}
+      <section style={{
+        background: 'linear-gradient(135deg, #0f3d57, #0a2e45)',
+        padding: '60px 24px',
+        textAlign: 'center',
+      }}>
+        <div style={{ maxWidth: '640px', margin: '0 auto' }}>
+          <p style={{ fontSize: '13px', fontWeight: 600, letterSpacing: '2px', textTransform: 'uppercase', color: '#14b8a6', margin: '0 0 12px' }}>
+            Why Trek Nepal
+          </p>
+          <h2 style={{ fontSize: '28px', fontWeight: 700, color: '#fff', margin: '0 0 32px', lineHeight: 1.3 }}>
+            Local guides. Small groups. Authentic experiences.
+          </h2>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '40px', flexWrap: 'wrap' }}>
+            {['🧭 Expert local guides', '🛡️ Safety certified', '🌿 Responsible travel', '📡 Transparent pricing'].map((f, i) => (
+              <span key={i} style={{ color: 'rgba(255,255,255,0.75)', fontSize: '14px', fontWeight: 500 }}>{f}</span>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Why Choose Us */}
-      <section className="py-16 px-8 bg-gray-50">
-        <h2 className="text-3xl font-bold text-center mb-12 text-gray-800">
-          Why Trek Nepal?
-        </h2>
-        <div className="grid grid-cols-4 gap-6 max-w-5xl mx-auto">
-          {[
-            { icon: '✅', title: 'Verified Guides', desc: 'All guides are licensed and background checked' },
-            { icon: '💳', title: 'Secure Payments', desc: 'Pay via eSewa, Khalti or Stripe safely' },
-            { icon: '🗺️', title: 'Route Maps', desc: 'Detailed GPX maps and altitude profiles' },
-            { icon: '🆘', title: '24/7 Support', desc: 'Emergency support throughout your trek' },
-          ].map((item) => (
-            <div key={item.title} className="text-center p-4">
-              <div className="text-3xl mb-3">{item.icon}</div>
-              <h3 className="font-semibold mb-2">{item.title}</h3>
-              <p className="text-gray-500 text-sm">{item.desc}</p>
+      {/* ── FEATURED TOURS ── */}
+      <section style={{ maxWidth: '1200px', margin: '0 auto', padding: '80px 24px' }}>
+        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: '40px', flexWrap: 'wrap', gap: '12px' }}>
+          <div>
+            <div style={{ fontSize: '12px', fontWeight: 600, letterSpacing: '2px', textTransform: 'uppercase', color: '#14b8a6', marginBottom: '8px' }}>
+              Tours
             </div>
-          ))}
+            <h2 style={{ fontSize: '32px', fontWeight: 800, color: '#0a2e45', margin: 0, letterSpacing: '-0.5px' }}>
+              Featured Tours
+            </h2>
+          </div>
+          <Link href="/tours" style={{ textDecoration: 'none' }}>
+            <span style={{ fontSize: '14px', fontWeight: 600, color: '#14b8a6' }}>View all tours →</span>
+          </Link>
+        </div>
+
+        {featuredTours.length === 0 ? (
+          <EmptyState label="tours" />
+        ) : (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '24px' }}>
+            {featuredTours.map((tour: any) => (
+              <TourCard key={tour.id} tour={tour} />
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* ── CTA ── */}
+      <section style={{
+        background: 'linear-gradient(135deg, #0f3d57 0%, #0a2e45 100%)',
+        padding: '100px 24px',
+        textAlign: 'center',
+      }}>
+        <div style={{ maxWidth: '560px', margin: '0 auto' }}>
+          <h2 style={{ fontSize: '40px', fontWeight: 800, color: '#fff', margin: '0 0 16px', letterSpacing: '-1px' }}>
+            Ready for your<br />next adventure?
+          </h2>
+          <p style={{ fontSize: '16px', color: 'rgba(255,255,255,0.55)', margin: '0 0 40px', lineHeight: 1.75 }}>
+            Join thousands of trekkers who've trusted Trek Nepal to make their Himalayan journey unforgettable.
+          </p>
+          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
+            <Link href="/auth/register" style={{ textDecoration: 'none' }}>
+              <button style={{
+                padding: '14px 36px', borderRadius: '10px', border: 'none',
+                background: 'linear-gradient(135deg, #14b8a6, #0d9488)',
+                color: '#fff', fontSize: '15px', fontWeight: 700, cursor: 'pointer',
+              }}>Get Started — Free</button>
+            </Link>
+            <Link href="/about" style={{ textDecoration: 'none' }}>
+              <button style={{
+                padding: '14px 32px', borderRadius: '10px',
+                border: '1.5px solid rgba(255,255,255,0.3)',
+                background: 'transparent',
+                color: '#fff', fontSize: '15px', fontWeight: 600, cursor: 'pointer',
+              }}>Learn About Us</button>
+            </Link>
+          </div>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-green-900 text-white py-10 px-8">
-        <div className="max-w-6xl mx-auto grid grid-cols-4 gap-8">
-          <div>
-            <div className="text-xl font-bold mb-3">🏔️ Trek Nepal</div>
-            <p className="text-green-300 text-sm">Your trusted travel partner in Nepal since 2024.</p>
-          </div>
-          <div>
-            <h4 className="font-semibold mb-3">Explore</h4>
-            <div className="flex flex-col gap-2 text-green-300 text-sm">
-              <Link href="/trek">Treks</Link>
-              <Link href="/tours">Tours</Link>
-              <Link href="/gear">Gear</Link>
-            </div>
-          </div>
-          <div>
-            <h4 className="font-semibold mb-3">Account</h4>
-            <div className="flex flex-col gap-2 text-green-300 text-sm">
-              <Link href="/auth/login">Login</Link>
-              <Link href="/auth/register">Register</Link>
-              <Link href="/dashboard">Dashboard</Link>
-            </div>
-          </div>
-          <div>
-            <h4 className="font-semibold mb-3">Contact</h4>
-            <div className="flex flex-col gap-2 text-green-300 text-sm">
-              <span>📧 info@treknepal.com</span>
-              <span>📞 +977-1-XXXXXXX</span>
-              <span>📍 Kathmandu, Nepal</span>
-            </div>
-          </div>
-        </div>
-        <div className="text-center text-green-400 text-sm mt-8 border-t border-green-700 pt-6">
-          © 2024 Trek Nepal. Built by Abhishek Jha.
-        </div>
-      </footer>
-
     </main>
+  );
+}
+
+function EmptyState({ label }: { label: string }) {
+  return (
+    <div style={{
+      textAlign: 'center', padding: '64px 24px',
+      background: '#fff', borderRadius: '16px',
+      border: '1px dashed #cbd5e1',
+    }}>
+      <div style={{ fontSize: '40px', marginBottom: '12px' }}>🏔️</div>
+      <p style={{ color: '#64748b', fontSize: '15px', margin: '0 0 4px' }}>No {label} yet.</p>
+      <a href="http://127.0.0.1:8000/admin" style={{ fontSize: '13px', color: '#14b8a6', fontWeight: 600 }}>
+        Add from Django admin →
+      </a>
+    </div>
   );
 }

@@ -29,7 +29,10 @@ INSTALLED_APPS = [
     'gear',
     'booking',
     'reviews',
+    
 ]
+
+AUTH_USER_MODEL = 'account.User'
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',

@@ -1,6 +1,8 @@
+# from django.db import models
+# from django.conf import settings
+from decimal import Decimal
 from django.db import models
 from django.conf import settings
-
 
 class Category(models.Model):
     name = models.CharField(max_length=100)
@@ -78,9 +80,14 @@ class Trek(models.Model):
     def __str__(self):
         return self.title
 
+    # def discounted_price(self):
+    #     if self.discount_percent > 0:
+    #         return self.price_per_person * (1 - self.discount_percent / 100)
+    #     return self.price_per_person
+
     def discounted_price(self):
         if self.discount_percent > 0:
-            return self.price_per_person * (1 - self.discount_percent / 100)
+            return self.price_per_person * (Decimal(100) - Decimal(self.discount_percent)) / Decimal(100)
         return self.price_per_person
 
     class Meta:

@@ -195,6 +195,7 @@ export default function TreksPage() {
   const [filter, setFilter] = useState<string>('all');
 
   const allTreks: any[] = data?.results || data || [];
+  console.log(allTreks, "This is alltrek")
   const treks = filter === 'all' ? allTreks : allTreks.filter(t => t.difficulty === filter);
 
   if (isLoading) return (

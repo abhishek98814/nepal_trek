@@ -105,3 +105,18 @@ class TrekAvailabilityView(generics.ListCreateAPIView):
     def perform_create(self, serializer):
         trek = get_object_or_404(Trek, slug=self.kwargs['slug'])
         serializer.save(trek=trek)
+
+
+
+class AdminTrekListView(generics.ListAPIView):
+    serializer_class = TrekListSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        print(user)
+
+        if user.role == "admin":
+            return Trek.objects.all()
+
+        return Trek.objects.filter(created_by=user)

@@ -1,77 +1,159 @@
 from rest_framework import serializers
-from .models import Tour, TourImage, TourItinerary, TourAvailability, TourCategory, TourGuide
+from decimal import Decimal
 
+from .models import (
+    Tour,
+    TourImage,
+    TourItinerary,
+    TourAvailability,
+    TourCategory,
+    TourGuide
+)
 
+# =========================
+# CATEGORY
+# =========================
 class TourCategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = TourCategory
         fields = ['id', 'name', 'slug', 'description', 'icon']
 
 
+# =========================
+# IMAGE
+# =========================
 class TourImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = TourImage
         fields = ['id', 'image', 'caption', 'is_cover', 'uploaded_at']
 
 
+# =========================
+# ITINERARY
+# =========================
 class TourItinerarySerializer(serializers.ModelSerializer):
     class Meta:
         model = TourItinerary
-        fields = ['id', 'day', 'title', 'description',
-                  'accommodation', 'meals', 'places_to_visit']
+        fields = [
+            'id',
+            'day',
+            'title',
+            'description',
+            'accommodation',
+            'meals',
+            'places_to_visit'
+        ]
 
 
+# =========================
+# AVAILABILITY
+# =========================
 class TourAvailabilitySerializer(serializers.ModelSerializer):
     remaining_slots = serializers.ReadOnlyField()
 
     class Meta:
         model = TourAvailability
-        fields = ['id', 'start_date', 'end_date', 'available_slots',
-                  'booked_slots', 'remaining_slots', 'is_active']
+        fields = [
+            'id',
+            'start_date',
+            'end_date',
+            'available_slots',
+            'booked_slots',
+            'remaining_slots',
+            'is_active'
+        ]
 
 
+# =========================
+# GUIDE
+# =========================
 class TourGuideSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source='user.username', read_only=True)
     email = serializers.CharField(source='user.email', read_only=True)
 
     class Meta:
         model = TourGuide
-        fields = ['id', 'username', 'email', 'license_number',
-                  'experience_years', 'languages', 'specialization',
-                  'is_verified', 'average_rating', 'total_tours',
-                  'profile_picture', 'bio']
+        fields = [
+            'id',
+            'username',
+            'email',
+            'license_number',
+            'experience_years',
+            'languages',
+            'specialization',
+            'is_verified',
+            'average_rating',
+            'total_tours',
+            'profile_picture',
+            'bio'
+        ]
 
 
+# =========================
+# LIST SERIALIZER (FAST API)
+# =========================
 class TourListSerializer(serializers.ModelSerializer):
     cover_image = serializers.SerializerMethodField()
-    discounted_price = serializers.ReadOnlyField()
+    discounted_price = serializers.SerializerMethodField()
     category_name = serializers.CharField(source='category.name', read_only=True)
 
     class Meta:
         model = Tour
         fields = [
-            'id', 'title', 'slug', 'tour_type', 'difficulty',
-            'duration_days', 'duration_hours', 'destination',
-            'region', 'price_per_person', 'discounted_price',
-            'discount_percent', 'best_season', 'is_featured',
-            'average_rating', 'total_bookings', 'cover_image',
-            'category_name', 'guide_included', 'transport_included',
-            'meals_included',
+            'id',
+            'title',
+            'slug',
+            'tour_type',
+            'difficulty',
+            'duration_days',
+            'duration_hours',
+            'destination',
+            'region',
+            'price_per_person',
+            'discounted_price',
+            'discount_percent',
+            'best_season',
+            'is_featured',
+            'average_rating',
+            'total_bookings',
+            'cover_image',
+            'category_name',
+            'guide_included',
+            'transport_included',
+            'meals_included'
         ]
 
+    def get_discounted_price(self, obj):
+        if obj.discount_percent > 0:
+            return obj.price_per_person * (Decimal(100) - Decimal(obj.discount_percent)) / Decimal(100)
+        return obj.price_per_person
+
     def get_cover_image(self, obj):
+        request = self.context.get('request')
+
         cover = obj.images.filter(is_cover=True).first()
+
+        # fallback if no cover image set
+        if not cover:
+            cover = obj.images.first()
+
         if cover:
-            request = self.context.get('request')
-            return request.build_absolute_uri(cover.image.url) if request else cover.image.url
+            if request:
+                return request.build_absolute_uri(cover.image.url)
+            return cover.image.url
+
         return None
 
 
+# =========================
+# DETAIL SERIALIZER (FULL DATA)
+# =========================
 class TourDetailSerializer(serializers.ModelSerializer):
     images = TourImageSerializer(many=True, read_only=True)
     itinerary = TourItinerarySerializer(many=True, read_only=True)
     availability = TourAvailabilitySerializer(many=True, read_only=True)
-    discounted_price = serializers.ReadOnlyField()
+
+    discounted_price = serializers.SerializerMethodField()
     category = TourCategorySerializer(read_only=True)
     created_by = serializers.StringRelatedField()
 
@@ -79,12 +161,25 @@ class TourDetailSerializer(serializers.ModelSerializer):
         model = Tour
         fields = '__all__'
 
+    def get_discounted_price(self, obj):
+        if obj.discount_percent > 0:
+            return obj.price_per_person * (Decimal(100) - Decimal(obj.discount_percent)) / Decimal(100)
+        return obj.price_per_person
 
+
+# =========================
+# CREATE / UPDATE SERIALIZER
+# =========================
 class TourCreateUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tour
-        exclude = ['created_by', 'total_bookings', 'average_rating',
-                   'created_at', 'updated_at']
+        exclude = [
+            'created_by',
+            'total_bookings',
+            'average_rating',
+            'created_at',
+            'updated_at'
+        ]
 
     def create(self, validated_data):
         validated_data['created_by'] = self.context['request'].user

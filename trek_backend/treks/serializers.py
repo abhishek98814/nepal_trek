@@ -32,6 +32,7 @@ class TrekAvailabilitySerializer(serializers.ModelSerializer):
 
 class TrekListSerializer(serializers.ModelSerializer):
     cover_image = serializers.SerializerMethodField()
+    images = TrekImageSerializer(many=True, read_only=True)  # ← added
     discounted_price = serializers.ReadOnlyField()
     category_name = serializers.CharField(source='category.name', read_only=True)
 
@@ -42,11 +43,13 @@ class TrekListSerializer(serializers.ModelSerializer):
             'max_altitude', 'price_per_person', 'discounted_price',
             'discount_percent', 'best_season', 'region',
             'average_rating', 'total_bookings', 'is_featured',
-            'cover_image', 'category_name', 'tims_required',
+            'cover_image', 'images', 'category_name', 'tims_required',  # ← added images
         ]
 
-    def get_cover_image(self, obj):              # fix: moved outside Meta
+    def get_cover_image(self, obj):
         cover = obj.images.filter(is_cover=True).first()
+        if not cover:
+            cover = obj.images.first()  # ← fallback to first image
         if cover:
             request = self.context.get('request')
             return request.build_absolute_uri(cover.image.url) if request else cover.image.url
@@ -56,14 +59,14 @@ class TrekListSerializer(serializers.ModelSerializer):
 class TrekDetailSerializer(serializers.ModelSerializer):
     images = TrekImageSerializer(many=True, read_only=True)
     itinerary = TrekItinerarySerializer(many=True, read_only=True)
-    availability = TrekAvailabilitySerializer(many=True, read_only=True)  # fix: spelling
+    availability = TrekAvailabilitySerializer(many=True, read_only=True)
     discounted_price = serializers.ReadOnlyField()
-    category = CategorySerializer(read_only=True)                          # fix: lowercase
+    category = CategorySerializer(read_only=True)
     created_by = serializers.StringRelatedField()
 
     class Meta:
         model = Trek
-        fields = '__all__'                                                 # fix: fields not field
+        fields = '__all__'
 
 
 class TrekCreateUpdateSerializer(serializers.ModelSerializer):
@@ -73,5 +76,5 @@ class TrekCreateUpdateSerializer(serializers.ModelSerializer):
                    'created_at', 'updated_at']
 
     def create(self, validated_data):
-        validated_data['created_by'] = self.context['request'].user       # fix: user not User
+        validated_data['created_by'] = self.context['request'].user
         return super().create(validated_data)

@@ -80,10 +80,6 @@ class Trek(models.Model):
     def __str__(self):
         return self.title
 
-    # def discounted_price(self):
-    #     if self.discount_percent > 0:
-    #         return self.price_per_person * (1 - self.discount_percent / 100)
-    #     return self.price_per_person
 
     def discounted_price(self):
         if self.discount_percent > 0:
@@ -95,9 +91,9 @@ class Trek(models.Model):
 
 
 class TrekImage(models.Model):
-    trek = models.ForeignKey(Trek, on_delete=models.CASCADE, related_name='images')
-    image = models.ImageField(upload_to='trek_images/')
-    caption = models.CharField(max_length=200, blank=True)
+    trek = models.ForeignKey(Trek, on_delete=models.CASCADE, related_name="images")
+    image = models.ImageField(upload_to="treks/")
+    caption = models.CharField(max_length=255, blank=True)
     is_cover = models.BooleanField(default=False)
     uploaded_at = models.DateTimeField(auto_now_add=True)
 

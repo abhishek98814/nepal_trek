@@ -19,6 +19,8 @@ export default function ToursPage() {
 
   const tours = data?.results || data || [];
 
+  console.log(tours, "This is tours")
+
   return (
     <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '40px 24px' }}>
 
